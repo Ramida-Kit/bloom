@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex flex-column gap-4">
+  <div class="card shadow-sm rounded-4 mb-3">
+    <div class="card-header bg-light d-flex align-items-center">
+      <h4 class="mb-0">Jokes & Categories</h4>
+    </div>
+    <div class="card-body">
+      <div class="d-flex flex-row align-items-start gap-4">
+        <div class="add-blank-card">
+          <button class="add-blank-btn" aria-label="Add Category or Joke">
+            <span class="add-blank-icon">+</span>
+          </button>
+          <div class="add-blank-label">Blank</div>
+        </div>
+        <div class="flex-grow-1">
+          {% for category in categories %}
+            <div class="mb-3">
+              <a href="#" class="fw-bold">{{ category.name }}</a>
+              <!-- List jokes in category -->
+              <ul class="list-group list-group-flush">
+                {% for joke in category.jokes.all %}
+                  <li class="list-group-item">{{ joke.name }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card shadow-sm rounded-4 mb-3">
+    <div class="card-header bg-light d-flex align-items-center">
+      <h4 class="mb-0">Joke Sets</h4>
+    </div>
+    <div class="card-body">
+      <div class="d-flex flex-row align-items-start gap-4">
+        <div class="add-blank-card">
+          <button class="add-blank-btn" aria-label="Add Joke Set">
+            <span class="add-blank-icon">+</span>
+          </button>
+          <div class="add-blank-label">Blank</div>
+        </div>
+        <div class="flex-grow-1">
+          {% for joke_set in joke_sets %}
+            <div class="mb-3">
+              <a href="#" class="fw-bold">{{ joke_set.name }}</a>
+              <!-- List jokes in set -->
+              <ul class="list-group list-group-flush">
+                {% for item in joke_set.joke_items.all %}
+                  <li class="list-group-item">{{ item.joke.name }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+  .add-blank-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 140px;
+    background: #fff;
+    border-radius: 1rem;
+    box-shadow: 0 2px 8px rgba(60,60,60,0.10);
+    margin: 0 auto;
+    transition: box-shadow 0.2s, background 0.2s;
+  }
+  .add-blank-btn {
+    background: none;
+    border: none;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 18px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(60,60,60,0.10);
+    background: #f8fafc;
+    transition: box-shadow 0.2s, background 0.2s;
+  }
+  .add-blank-btn:hover {
+    background: #e0e7ef;
+    box-shadow: 0 4px 16px rgba(60,60,60,0.16);
+  }
+  .add-blank-icon {
+    font-size: 2.2rem;
+    color: #4285f4;
+    font-weight: bold;
+    line-height: 1;
+  }
+  .add-blank-label {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+</style>
+{% endblock %}

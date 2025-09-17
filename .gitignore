@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Django
+*.sqlite3
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.db
+
+# VS Code
+.vscode/
+
+# Virtual environments
+venv/
+.env/
+.venv/
+ENV/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Other
+*.bak
+*.swp
+*.swo
+
+# Node
+node_modules/
+
+# Coverage
+htmlcov/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+test-results/
+
+# Static/media
+staticfiles/
+media/
+
+# Build
+build/
+dist/
+*.egg-info/

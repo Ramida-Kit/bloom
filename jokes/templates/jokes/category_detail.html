@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>{{ category.name }} - Jokes</h2>
+<a href="#" class="btn btn-primary btn-sm rounded-pill mb-3">+ Add Joke</a>
+<ul class="list-group mb-4">
+  {% for joke in jokes %}
+    <li class="list-group-item">
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="fw-bold">{{ joke.name }}</span>
+        <a href="#" class="btn btn-outline-secondary btn-sm">Edit</a>
+      </div>
+      <div class="mt-2">
+        <span class="text-muted">Setup:</span> {{ joke.setup }}<br>
+        <span class="text-muted">Punchline:</span> {{ joke.punchline }}<br>
+        <span class="text-muted">Runtime:</span> {{ joke.runtime }}s
+      </div>
+      <div class="mt-2">
+        <span class="text-muted">Toppers:</span>
+        <ul class="list-group list-group-flush">
+          {% for topper in joke.toppers.all|dictsort:'order' %}
+            <li class="list-group-item">{{ topper.text }}</li>
+          {% empty %}
+            <li class="list-group-item text-muted">No toppers yet.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </li>
+  {% empty %}
+    <li class="list-group-item text-muted">No jokes yet.</li>
+  {% endfor %}
+</ul>
+{% endblock %}
