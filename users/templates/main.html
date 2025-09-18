@@ -8,22 +8,18 @@
     <div class="card-body">
       <div class="d-flex flex-row align-items-start gap-4">
         <div class="add-blank-card">
-          <button class="add-blank-btn" aria-label="Add Category or Joke">
+          <button class="add-blank-btn" aria-label="Add Category or Joke" id="add-category-btn">
             <span class="add-blank-icon">+</span>
           </button>
           <div class="add-blank-label">Blank</div>
         </div>
-        <div class="flex-grow-1">
+  <div class="category-gallery" style="justify-content: flex-start;">
           {% for category in categories %}
-            <div class="mb-3">
-              <a href="#" class="fw-bold">{{ category.name }}</a>
-              <!-- List jokes in category -->
-              <ul class="list-group list-group-flush">
-                {% for joke in category.jokes.all %}
-                  <li class="list-group-item">{{ joke.name }}</li>
-                {% endfor %}
-              </ul>
-            </div>
+            <a href="{% url 'category_detail' category.id %}" class="category-card-link">
+              <div class="category-card">
+                <span class="fw-bold">{{ category.name }}</span>
+              </div>
+            </a>
           {% endfor %}
         </div>
       </div>
@@ -58,7 +54,97 @@
     </div>
   </div>
 </div>
+<!-- Modal for adding category -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addCategoryModalLabel">Add New Category</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="post" action="/jokes/add_category/">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="categoryName" class="form-label">Category Name</label>
+            <input type="text" class="form-control" id="categoryName" name="name" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+document.getElementById('add-category-btn').addEventListener('click', function() {
+  var modal = new bootstrap.Modal(document.getElementById('addCategoryModal'));
+  modal.show();
+});
+</script>
 <style>
+  .category-gallery {
+    display: flex;
+    flex-direction: row;
+    gap: 24px;
+    align-items: center;
+    margin-left: 0;
+    margin-top: 0;
+    margin-bottom: 8px;
+    justify-content: flex-start;
+  }
+  .category-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  .category-card-link:hover .category-card {
+    box-shadow: 0 4px 16px rgba(60,60,60,0.16);
+    background: #f3f6fb;
+  }
+  .category-card {
+    background: #fff;
+    border: 1px solid #e0e7ef;
+    box-shadow: 0 2px 8px rgba(60,60,60,0.08);
+    border-radius: 1rem;
+    width: 120px;
+    min-width: 120px;
+    max-width: 120px;
+    height: 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: box-shadow 0.2s, background 0.2s;
+    margin-bottom: 0;
+    overflow: hidden;
+  }
+  .category-card .fw-bold {
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+    color: #4285f4;
+    text-decoration: none;
+    font-weight: 600;
+    text-align: center;
+    width: 100%;
+    margin-top: 18px;
+  }
+  .category-card .list-group {
+    width: 100%;
+    padding: 0 8px;
+    font-size: 0.95rem;
+    text-align: left;
+  }
+  .category-card .fw-bold {
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+    color: #4285f4;
+    text-decoration: none;
+    font-weight: 600;
+  }
   .add-blank-card {
     display: flex;
     flex-direction: column;
@@ -69,7 +155,7 @@
     background: #fff;
     border-radius: 1rem;
     box-shadow: 0 2px 8px rgba(60,60,60,0.10);
-    margin: 0 auto;
+    margin: 0;
     transition: box-shadow 0.2s, background 0.2s;
   }
   .add-blank-btn {
