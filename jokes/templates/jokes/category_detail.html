@@ -1,7 +1,11 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>{{ category.name }} - Jokes</h2>
-<button class="btn btn-primary btn-sm rounded-pill mb-3" id="add-joke-btn">+ Add Joke</button>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>{{ category.name }} - Jokes</h2>
+    <div>
+        <button class="btn btn-primary btn-sm rounded-pill" id="add-joke-btn">+ Add Joke</button>
+    </div>
+</div>
 
 <!-- Modal for adding joke -->
 <div class="modal fade" id="addJokeModal" tabindex="-1" aria-labelledby="addJokeModalLabel" aria-hidden="true">
@@ -33,9 +37,9 @@
           <div class="mb-3">
             <label class="form-label">Toppers</label>
             <div id="add-joke-toppers-list"></div>
-            <div class="input-group mb-2">
-              <input type="text" class="form-control" id="add-joke-topper-input" placeholder="Enter topper text">
-              <button type="button" class="btn btn-outline-primary" id="add-joke-topper-btn">Add Topper</button>
+            <div class="mb-2">
+              <textarea class="form-control" id="add-joke-topper-input" placeholder="Enter topper text" rows="3"></textarea>
+              <button type="button" class="btn btn-outline-primary mt-2" id="add-joke-topper-btn">Add Topper</button>
             </div>
             <input type="hidden" name="toppers" id="add-joke-toppers-hidden">
             <small class="form-text text-muted">Add toppers one by one. You can rearrange toppers after adding the joke.</small>
@@ -49,137 +53,7 @@
     </div>
   </div>
 </div>
-<script>
-// Drag-and-drop for toppers in edit modal
-document.querySelectorAll('ul[id^="edit-topper-list-"]').forEach(function(list) {
-  let dragged;
-  list.addEventListener('dragstart', function(e) {
-    dragged = e.target;
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', null);
-  });
-  list.addEventListener('dragover', function(e) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  });
-  list.addEventListener('drop', function(e) {
-    e.preventDefault();
-    if (e.target.tagName === 'LI' && dragged !== e.target) {
-      if (e.target.nextSibling === dragged) {
-        list.insertBefore(dragged, e.target);
-      } else {
-        list.insertBefore(dragged, e.target.nextSibling);
-      }
-      updateTopperTextarea(list.id.split('-').pop());
-    }
-  });
-  // Optional: visually highlight drop target
-  list.addEventListener('dragenter', function(e) {
-    if (e.target.tagName === 'LI') e.target.classList.add('drag-over');
-  });
-  list.addEventListener('dragleave', function(e) {
-    if (e.target.tagName === 'LI') e.target.classList.remove('drag-over');
-  });
-  list.addEventListener('dragend', function(e) {
-    list.querySelectorAll('li').forEach(function(i) { i.classList.remove('drag-over'); });
-  });
-});
-document.getElementById('add-joke-btn').addEventListener('click', function() {
-  var modal = new bootstrap.Modal(document.getElementById('addJokeModal'));
-  modal.show();
-});
-        document.getElementById('add-joke-btn').addEventListener('click', function() {
-          var modal = new bootstrap.Modal(document.getElementById('addJokeModal'));
-          modal.show();
-        });
 
-        // Add Joke Modal: Dynamic topper add
-        let addJokeToppers = [];
-        document.getElementById('add-joke-topper-btn').addEventListener('click', function() {
-          const input = document.getElementById('add-joke-topper-input');
-          const val = input.value.trim();
-          if (val) {
-            addJokeToppers.push(val);
-            input.value = '';
-            renderAddJokeToppers();
-          }
-        });
-        function renderAddJokeToppers() {
-          const list = document.getElementById('add-joke-toppers-list');
-          list.innerHTML = '';
-          addJokeToppers.forEach((topper, idx) => {
-            const li = document.createElement('div');
-            li.className = 'alert alert-secondary py-1 px-2 mb-1 d-flex justify-content-between align-items-center';
-            li.innerHTML = `<span>${topper}</span><button type="button" class="btn btn-sm btn-danger ms-2" onclick="removeAddJokeTopper(${idx})">&times;</button>`;
-            list.appendChild(li);
-          });
-          document.getElementById('add-joke-toppers-hidden').value = addJokeToppers.join('\n');
-        }
-        function removeAddJokeTopper(idx) {
-          addJokeToppers.splice(idx, 1);
-          renderAddJokeToppers();
-        }
-
-        // Edit Joke Modal: Dynamic topper add and drag-and-drop
-        function addEditJokeTopper(jokeId) {
-          const input = document.getElementById('edit-joke-topper-input-' + jokeId);
-          const val = input.value.trim();
-          if (val) {
-            const list = document.getElementById('edit-topper-list-' + jokeId);
-            const li = document.createElement('li');
-            li.className = 'list-group-item';
-            li.setAttribute('draggable', 'true');
-            li.textContent = val;
-            list.appendChild(li);
-            input.value = '';
-            updateTopperTextarea(jokeId);
-          }
-        }
-        function updateTopperTextarea(jokeId) {
-          var list = document.getElementById('edit-topper-list-' + jokeId);
-          var textarea = document.getElementById('edit-topper-textarea-' + jokeId);
-          var toppers = [];
-          for (var i = 0; i < list.children.length; i++) {
-            toppers.push(list.children[i].textContent.trim());
-          }
-          textarea.value = toppers.join('\n');
-        }
-        document.querySelectorAll('[id^="edit-topper-list-"]').forEach(function(list) {
-          let dragged;
-          list.addEventListener('dragstart', function(e) {
-            dragged = e.target;
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', null);
-          });
-          list.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-          });
-          list.addEventListener('drop', function(e) {
-            e.preventDefault();
-            if (e.target.tagName === 'LI' && dragged !== e.target) {
-              if (e.target.nextSibling === dragged) {
-                list.insertBefore(dragged, e.target);
-              } else {
-                list.insertBefore(dragged, e.target.nextSibling);
-              }
-              updateTopperTextarea(list.id.split('-').pop());
-            }
-          });
-          // Optional: visually highlight drop target
-          list.querySelectorAll('li').forEach(function(item) {
-            item.addEventListener('dragenter', function(e) {
-              e.target.classList.add('drag-over');
-            });
-            item.addEventListener('dragleave', function(e) {
-              e.target.classList.remove('drag-over');
-            });
-            item.addEventListener('dragend', function(e) {
-              list.querySelectorAll('li').forEach(function(i) { i.classList.remove('drag-over'); });
-            });
-          });
-        });
-</script>
 <ul class="list-group mb-4">
   {% for joke in jokes %}
   <li class="list-group-item mb-5">
@@ -196,7 +70,9 @@ document.getElementById('add-joke-btn').addEventListener('click', function() {
         <span class="text-muted">Toppers:</span>
         <ul class="list-group list-group-flush" id="topper-list-{{ joke.id }}">
           {% for topper in joke.toppers.all|dictsort:'order' %}
-            <li class="list-group-item" draggable="true" data-topper-id="{{ topper.id }}">{{ topper.text }}</li>
+            <li class="list-group-item d-flex align-items-center">
+              <span class="topper-text flex-grow-1">{{ topper.text }}</span>
+            </li>
           {% empty %}
             <li class="list-group-item text-muted">No toppers yet.</li>
           {% endfor %}
@@ -234,46 +110,19 @@ document.getElementById('add-joke-btn').addEventListener('click', function() {
                   <label class="form-label">Toppers</label>
                   <ul class="list-group" id="edit-topper-list-{{ joke.id }}">
                     {% for topper in joke.toppers.all|dictsort:'order' %}
-                        <li class="list-group-item" draggable="true" data-topper-id="{{ topper.id }}">{{ topper.text }}</li>
+                        <li class="list-group-item d-flex align-items-center" draggable="true" data-topper-id="{{ topper.id }}">
+                          <span class="drag-handle me-2" style="cursor: move; color: #6c757d;">⋮⋮</span>
+                          <span class="topper-text flex-grow-1">{{ topper.text }}</span>
+                          <div class="btn-group btn-group-sm ms-2">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="editModalTopper({{ joke.id }}, this)">Edit</button>
+                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="deleteModalTopper({{ joke.id }}, this)">Delete</button>
+                          </div>
+                        </li>
                     {% endfor %}
-  // Drag-and-drop for toppers in edit modal
-  document.querySelectorAll('ul[id^="edit-topper-list-"]').forEach(function(list) {
-    let dragged;
-    list.addEventListener('dragstart', function(e) {
-      dragged = e.target;
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', null);
-    });
-    list.addEventListener('dragover', function(e) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-    });
-    list.addEventListener('drop', function(e) {
-      e.preventDefault();
-      if (e.target.tagName === 'LI' && dragged !== e.target) {
-        if (e.target.nextSibling === dragged) {
-          list.insertBefore(dragged, e.target);
-        } else {
-          list.insertBefore(dragged, e.target.nextSibling);
-        }
-        updateTopperTextarea(list.id.split('-').pop());
-      }
-    });
-    // Optional: visually highlight drop target
-    list.addEventListener('dragenter', function(e) {
-      if (e.target.tagName === 'LI') e.target.classList.add('drag-over');
-    });
-    list.addEventListener('dragleave', function(e) {
-      if (e.target.tagName === 'LI') e.target.classList.remove('drag-over');
-    });
-    list.addEventListener('dragend', function(e) {
-      list.querySelectorAll('li').forEach(function(i) { i.classList.remove('drag-over'); });
-    });
-  });
                   </ul>
-                  <div class="input-group mb-2 mt-2">
-                    <input type="text" class="form-control" id="edit-joke-topper-input-{{ joke.id }}" placeholder="Enter topper text">
-                    <button type="button" class="btn btn-outline-primary" onclick="addEditJokeTopper({{ joke.id }})">Add Topper</button>
+                  <div class="mb-2 mt-2">
+                    <textarea class="form-control" id="edit-joke-topper-input-{{ joke.id }}" placeholder="Enter topper text" rows="3"></textarea>
+                    <button type="button" class="btn btn-outline-primary mt-2" onclick="addEditJokeTopper({{ joke.id }})">Add Topper</button>
                   </div>
                   <input type="hidden" name="toppers" id="edit-topper-textarea-{{ joke.id }}">
                   <small class="form-text text-muted">Add toppers one by one. Drag to reorder. Changes will be saved on update.</small>
@@ -292,67 +141,208 @@ document.getElementById('add-joke-btn').addEventListener('click', function() {
     <li class="list-group-item text-muted">No jokes yet.</li>
   {% endfor %}
 </ul>
+
 <script>
-// Drag and drop for toppers in edit modal
+// Add Joke Modal functionality
+document.getElementById('add-joke-btn').addEventListener('click', function() {
+  var modal = new bootstrap.Modal(document.getElementById('addJokeModal'));
+  modal.show();
+});
+
+// Add Joke Modal: Dynamic topper add
+let addJokeToppers = [];
+document.getElementById('add-joke-topper-btn').addEventListener('click', function() {
+  const input = document.getElementById('add-joke-topper-input');
+  const val = input.value.trim();
+  if (val) {
+    addJokeToppers.push(val);
+    input.value = '';
+    renderAddJokeToppers();
+  }
+});
+
+function renderAddJokeToppers() {
+  const list = document.getElementById('add-joke-toppers-list');
+  list.innerHTML = '';
+  addJokeToppers.forEach((topper, idx) => {
+    const li = document.createElement('div');
+    li.className = 'alert alert-secondary py-1 px-2 mb-1 d-flex justify-content-between align-items-center';
+    li.innerHTML = `<span>${topper}</span><button type="button" class="btn btn-sm btn-danger ms-2" onclick="removeAddJokeTopper(${idx})">&times;</button>`;
+    list.appendChild(li);
+  });
+  document.getElementById('add-joke-toppers-hidden').value = addJokeToppers.join('\n');
+}
+
+function removeAddJokeTopper(idx) {
+  addJokeToppers.splice(idx, 1);
+  renderAddJokeToppers();
+}
+
+// Edit Joke Modal: Dynamic topper add
+function addEditJokeTopper(jokeId) {
+  const input = document.getElementById('edit-joke-topper-input-' + jokeId);
+  const val = input.value.trim();
+  if (val) {
+    const list = document.getElementById('edit-topper-list-' + jokeId);
+    const li = document.createElement('li');
+    li.className = 'list-group-item d-flex align-items-center';
+    li.setAttribute('draggable', 'true');
+    li.innerHTML = `
+      <span class="drag-handle me-2" style="cursor: move; color: #6c757d;">⋮⋮</span>
+      <span class="topper-text flex-grow-1">${val}</span>
+      <div class="btn-group btn-group-sm ms-2">
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="editModalTopper(${jokeId}, this)">Edit</button>
+        <button type="button" class="btn btn-outline-danger btn-sm" onclick="deleteModalTopper(${jokeId}, this)">Delete</button>
+      </div>
+    `;
+    list.appendChild(li);
+    input.value = '';
+    updateTopperTextarea(jokeId);
+    
+    // Reinitialize drag and drop for the updated list
+    setupDragAndDrop();
+  }
+}
+
 function updateTopperTextarea(jokeId) {
   var list = document.getElementById('edit-topper-list-' + jokeId);
   var textarea = document.getElementById('edit-topper-textarea-' + jokeId);
   var toppers = [];
-  // If any topper is being edited, replace input with its value before saving
   for (var i = 0; i < list.children.length; i++) {
     var child = list.children[i];
-    var input = child.querySelector('input');
-    if (input) {
-      var newSpan = document.createElement('span');
-      newSpan.className = 'topper-text';
-      newSpan.textContent = input.value.trim();
-      input.replaceWith(newSpan);
-      // Also reset the Edit button
-      var editBtn = child.querySelector('button.btn-success');
-      if (editBtn) {
-        editBtn.textContent = 'Edit';
-        editBtn.classList.remove('btn-success');
-        editBtn.classList.add('btn-outline-secondary');
-        editBtn.onclick = function() { editTopper(this); };
-      }
+    var topperText = child.querySelector('.topper-text');
+    if (topperText) {
+      toppers.push(topperText.textContent.trim());
     }
-    toppers.push(child.querySelector('.topper-text').textContent.trim());
   }
   textarea.value = toppers.join('\n');
 }
-  document.querySelectorAll('[id^="edit-topper-list-"]').forEach(function(list) {
-    let dragged;
+
+// Drag-and-drop for toppers in edit modal
+document.addEventListener('DOMContentLoaded', function() {
+  setupDragAndDrop();
+});
+
+function setupDragAndDrop() {
+  document.querySelectorAll('ul[id^="edit-topper-list-"]').forEach(function(list) {
+    let draggedElement = null;
+    
     list.addEventListener('dragstart', function(e) {
-      dragged = e.target;
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', null);
+      if (e.target.closest('li')) {
+        draggedElement = e.target.closest('li');
+        draggedElement.style.opacity = '0.5';
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', draggedElement.outerHTML);
+      }
     });
+    
     list.addEventListener('dragover', function(e) {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
-    });
-    list.addEventListener('drop', function(e) {
-      e.preventDefault();
-      if (e.target.tagName === 'LI' && dragged !== e.target) {
-        if (e.target.nextSibling === dragged) {
-          list.insertBefore(dragged, e.target);
-        } else {
-          list.insertBefore(dragged, e.target.nextSibling);
-        }
+      
+      const afterElement = getDragAfterElement(list, e.clientY);
+      if (afterElement == null) {
+        list.appendChild(draggedElement);
+      } else {
+        list.insertBefore(draggedElement, afterElement);
       }
     });
-    // Optional: visually highlight drop target
-    list.querySelectorAll('li').forEach(function(item) {
-      item.addEventListener('dragenter', function(e) {
-        e.target.classList.add('drag-over');
-      });
-      item.addEventListener('dragleave', function(e) {
-        e.target.classList.remove('drag-over');
-      });
-      item.addEventListener('dragend', function(e) {
-        list.querySelectorAll('li').forEach(function(i) { i.classList.remove('drag-over'); });
-      });
+    
+    list.addEventListener('dragend', function(e) {
+      if (draggedElement) {
+        draggedElement.style.opacity = '';
+        list.querySelectorAll('li').forEach(li => li.classList.remove('drag-over'));
+        
+        // Update the hidden textarea after drag ends
+        const jokeId = list.id.split('-').pop();
+        updateTopperTextarea(jokeId);
+        
+        draggedElement = null;
+      }
+    });
+    
+    list.addEventListener('drop', function(e) {
+      e.preventDefault();
     });
   });
+}
+
+function getDragAfterElement(container, y) {
+  const draggableElements = [...container.querySelectorAll('li:not([style*="opacity: 0.5"])')];
+  
+  return draggableElements.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    
+    if (offset < 0 && offset > closest.offset) {
+      return { offset: offset, element: child };
+    } else {
+      return closest;
+    }
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+// Edit topper functionality for modal
+function editModalTopper(jokeId, button) {
+  const li = button.closest('li');
+  const topperTextSpan = li.querySelector('.topper-text');
+  const currentText = topperTextSpan.textContent.trim();
+  
+  // Replace text with textarea
+  topperTextSpan.innerHTML = `<textarea class="form-control form-control-sm" rows="3">${currentText}</textarea>`;
+  const textarea = topperTextSpan.querySelector('textarea');
+  textarea.focus();
+  textarea.select();
+  
+  // Change button to Save
+  button.textContent = 'Save';
+  button.className = 'btn btn-success btn-sm';
+  button.onclick = function() { saveModalTopper(jokeId, this); };
+}
+
+function saveModalTopper(jokeId, button) {
+  const li = button.closest('li');
+  const topperTextSpan = li.querySelector('.topper-text');
+  const textarea = topperTextSpan.querySelector('textarea');
+  const newText = textarea.value.trim();
+  
+  if (newText) {
+    topperTextSpan.textContent = newText;
+    button.textContent = 'Edit';
+    button.className = 'btn btn-outline-secondary btn-sm';
+    button.onclick = function() { editModalTopper(jokeId, this); };
+    updateTopperTextarea(jokeId);
+  }
+}
+
+function deleteModalTopper(jokeId, button) {
+  if (confirm('Are you sure you want to delete this topper?')) {
+    const li = button.closest('li');
+    li.remove();
+    updateTopperTextarea(jokeId);
+  }
+}
+
+// Update the CSS for better visual feedback
+const style = document.createElement('style');
+style.textContent = `
+  .drag-over {
+    background-color: #e9ecef !important;
+    border-color: #007bff !important;
+  }
+  .drag-handle {
+    user-select: none;
+  }
+  ul[id^="edit-topper-list-"] li[draggable="true"] {
+    transition: transform 0.2s ease;
+  }
+  ul[id^="edit-topper-list-"] li[draggable="true"]:hover {
+    background-color: #f8f9fa;
+  }
+  ul[id^="edit-topper-list-"] li[style*="opacity: 0.5"] {
+    transform: rotate(5deg);
+  }
+`;
+document.head.appendChild(style);
 </script>
 {% endblock %}

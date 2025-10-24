@@ -24,7 +24,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('users/', include('users.urls')),
     path('jokes/', include('jokes.urls')),
-    path('sets/', include('joke_sets.urls')),
+    path('sets/', include('joke_sets.urls', namespace='joke_sets')),
     path('accounts/', include('django.contrib.auth.urls')),
+    path('add_joke_set/', views.add_joke_set, name='add_joke_set'),
     path('', views.main, name='main'),
 ]

@@ -2,20 +2,8 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <div class="d-flex align-items-center gap-4">
-        <h2>{{ joke_set.name }}</h2>
-        <div class="d-flex gap-3">
-            <div class="text-center">
-                <div class="fw-bold text-success">{{ joke_set_items|length }}</div>
-                <small class="text-muted">Jokes</small>
-            </div>
-            <div class="text-center">
-                <div class="fw-bold text-info">{{ joke_set.total_runtime_formatted }}</div>
-                <small class="text-muted">Runtime</small>
-            </div>
-        </div>
-    </div>
-    <a href="{% url 'main' %}" class="btn btn-outline-secondary">← Back to Joke Sets</a>
+    <h2>{{ joke_set.name }}</h2>
+    <a href="{% url 'joke_sets' %}" class="btn btn-outline-secondary">← Back to Joke Sets</a>
 </div>
 
 <div class="row">
@@ -29,31 +17,31 @@
                     <div class="flex-grow-1">
                         <span class="drag-handle me-2" style="cursor: move; color: #6c757d;">⋮⋮</span>
                         <strong>{{ item.joke.name }}</strong>
-                        <small class="text-muted">({{ item.joke.category.name }}) - {{ item.joke.runtime|floatformat:0 }}s</small>
+                        <small class="text-muted">({{ item.joke.category.name }})</small>
                         <p class="mb-1">{{ item.joke.setup }}</p>
                         <p class="mb-2"><em>{{ item.joke.punchline }}</em></p>
                         
                         <!-- Selected Toppers -->
-                        {% if item.toppers.all %}
                         <div class="selected-toppers" data-item-id="{{ item.id }}">
                             <strong>Toppers:</strong>
                             <ul class="list-group list-group-flush mt-1" id="topper-list-{{ item.id }}">
-                                {% for topper in item.toppers.all %}
-                                <li class="list-group-item py-1 d-flex align-items-center" data-topper-set-id="{{ topper.id }}" draggable="true">
+                                {% for joke_set_topper in item.selected_toppers.all %}
+                                <li class="list-group-item py-1 d-flex align-items-center" data-topper-set-id="{{ joke_set_topper.id }}" draggable="true">
                                     <span class="drag-handle me-2" style="cursor: move; color: #6c757d; font-size: 0.8em;">⋮⋮</span>
-                                    <span class="flex-grow-1">{{ topper.text }}</span>
+                                    <span class="flex-grow-1">{{ joke_set_topper.topper.text }}</span>
                                     <form method="post" class="d-inline">
                                         {% csrf_token %}
                                         <input type="hidden" name="action" value="remove_topper">
-                                        <input type="hidden" name="topper_id" value="{{ topper.id }}">
+                                        <input type="hidden" name="topper_id" value="{{ joke_set_topper.id }}">
                                         <input type="hidden" name="item_id" value="{{ item.id }}">
                                         <button type="submit" class="btn btn-sm btn-outline-danger">×</button>
                                     </form>
                                 </li>
+                                {% empty %}
+                                <li class="list-group-item py-1 text-muted">No toppers selected</li>
                                 {% endfor %}
                             </ul>
                         </div>
-                        {% endif %}
                     </div>
                     <form method="post" class="ms-2">
                         {% csrf_token %}
@@ -100,18 +88,13 @@
                                             {% for topper in joke.toppers.all %}
                                             <div class="d-flex justify-content-between align-items-center mt-1">
                                                 <small class="text-muted">{{ topper.text|truncatechars:50 }}</small>
-                                                <!-- Find the corresponding item in joke set -->
-                                                {% for set_item in joke_set_items %}
-                                                    {% if set_item.joke.id == joke.id %}
-                                                        <form method="post" class="d-inline">
-                                                            {% csrf_token %}
-                                                            <input type="hidden" name="action" value="add_topper">
-                                                            <input type="hidden" name="item_id" value="{{ set_item.id }}">
-                                                            <input type="hidden" name="topper_id" value="{{ topper.id }}">
-                                                            <button type="submit" class="btn btn-xs btn-outline-success">Add</button>
-                                                        </form>
-                                                    {% endif %}
-                                                {% endfor %}
+                                                <form method="post" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="action" value="add_topper">
+                                                    <input type="hidden" name="item_id" id="item-for-topper-{{ topper.id }}">
+                                                    <input type="hidden" name="topper_id" value="{{ topper.id }}">
+                                                    <button type="button" class="btn btn-xs btn-outline-success add-topper-btn" data-topper-id="{{ topper.id }}">Add</button>
+                                                </form>
                                             </div>
                                             {% endfor %}
                                         </div>
@@ -133,6 +116,28 @@
                 </div>
             </div>
             {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal for selecting joke for topper -->
+<div class="modal fade" id="selectJokeModal" tabindex="-1" aria-labelledby="selectJokeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="selectJokeModalLabel">Select Joke for Topper</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Select which joke in your set to add this topper to:</p>
+                <div id="joke-selection-list">
+                    {% for item in joke_set_items %}
+                    <button type="button" class="btn btn-outline-primary mb-2 d-block w-100 select-joke-btn" data-item-id="{{ item.id }}">
+                        {{ item.joke.name }}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -247,7 +252,26 @@ function updateTopperOrder(itemId) {
     });
 }
 
+// Handle topper selection
+let selectedTopperId = null;
+document.querySelectorAll('.add-topper-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        selectedTopperId = this.dataset.topperId;
+        const modal = new bootstrap.Modal(document.getElementById('selectJokeModal'));
+        modal.show();
+    });
+});
 
+document.querySelectorAll('.select-joke-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        const itemId = this.dataset.itemId;
+        document.getElementById(`item-for-topper-${selectedTopperId}`).value = itemId;
+        
+        // Submit the form
+        const form = document.querySelector(`input[value="${selectedTopperId}"]`).closest('form');
+        form.submit();
+    });
+});
 
 // CSS for better drag and drop experience
 const style = document.createElement('style');

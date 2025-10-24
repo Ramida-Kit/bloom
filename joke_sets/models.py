@@ -10,6 +10,20 @@ class JokeSet(models.Model):
 
 	def __str__(self):
 		return self.name
+	
+	def total_runtime(self):
+		"""Calculate total runtime of all jokes in the set in seconds"""
+		total = 0
+		for joke_item in self.joke_items.all():
+			total += joke_item.joke.runtime
+		return total
+	
+	def total_runtime_formatted(self):
+		"""Return total runtime in MM:SS format"""
+		total_seconds = self.total_runtime()
+		minutes = total_seconds // 60
+		seconds = total_seconds % 60
+		return f"{minutes}:{seconds:02d}"
 
 class JokeSetJoke(models.Model):
 	joke_set = models.ForeignKey(JokeSet, on_delete=models.CASCADE, related_name='joke_items')

@@ -1,4 +1,3 @@
-
 from django.db import models
 from django.contrib.auth import get_user_model
 
@@ -29,3 +28,32 @@ class Topper(models.Model):
 
 	def __str__(self):
 		return f"Topper for {self.joke.name}: {self.text[:30]}"
+
+class JokeSet(models.Model):
+    name = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        ordering = ['-created_at']
+
+class JokeSetItem(models.Model):
+    joke_set = models.ForeignKey(JokeSet, on_delete=models.CASCADE, related_name='items')
+    joke = models.ForeignKey(Joke, on_delete=models.CASCADE)
+    order = models.IntegerField(default=0)
+    
+    class Meta:
+        ordering = ['order']
+        unique_together = ['joke_set', 'joke']
+
+class JokeSetTopper(models.Model):
+    joke_set_item = models.ForeignKey(JokeSetItem, on_delete=models.CASCADE, related_name='selected_toppers')
+    topper = models.ForeignKey(Topper, on_delete=models.CASCADE)
+    order = models.IntegerField(default=0)
+    
+    class Meta:
+        ordering = ['order']
+        unique_together = ['joke_set_item', 'topper']

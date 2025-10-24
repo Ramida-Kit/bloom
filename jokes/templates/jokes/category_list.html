@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Comedy Categories</h2>
+    <a href="{% url 'joke_sets' %}" class="btn btn-outline-success">Joke Sets</a>
+</div>
+
+<div class="row">
+    {% for category in categories %}
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ category.name }}</h5>
+                <p class="card-text text-muted">
+                    {{ category.jokes.count }} joke{{ category.jokes.count|pluralize }}
+                </p>
+                <a href="{% url 'category_detail' category.id %}" class="btn btn-primary">View Jokes</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <h4>No categories yet</h4>
+            <p>Create categories in the Django admin first.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
